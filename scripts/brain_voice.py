@@ -1,4 +1,4 @@
-"""Hands-free Brain for Bruce. Once started, Brain listens without needing its name.
+"""Hands-free Brain, a local voice assistant. Once started, Brain listens without needing its name.
 
 "Brain stop" pauses listening; "Brain start" (or "Brain, <request>") resumes.
 While Brain is talking or working, "Brain, stop" cuts it off (a bare "stop" is often
@@ -24,7 +24,7 @@ import warnings
 import zlib
 from pathlib import Path
 
-# Library notices about their own future changes; nothing for Bruce to act on.
+# Library notices about their own future changes; nothing for the user to act on.
 warnings.filterwarnings("ignore", message=r".*torch\.jit\.(load|script).*is deprecated")
 warnings.filterwarnings("ignore", message=r".*pkg_resources is deprecated")
 
@@ -33,7 +33,7 @@ import mlx_whisper
 import numpy as np
 import speech_recognition as sr
 from brain import LLM_URL, Brain
-from common import CANCEL
+from common import CANCEL, PROFILES, USER_NAME
 from speech import DEFAULT_VOICE, Speech
 
 WHISPER_MODEL = "mlx-community/whisper-large-v3-turbo"
@@ -53,11 +53,13 @@ YES = re.compile(
 NOISE = {"", "you", "thank you", "thanks for watching", "bye", "okay"}
 IDLE_PAUSE_SECONDS = 300
 # Words Whisper should expect; helps it spell names and commands right.
-VOCABULARY = "Brain, Bruce, Scott, Netflix, email, texts, Safari, Blacklist."
+VOCABULARY = ", ".join(dict.fromkeys(filter(None, [
+    "Brain", USER_NAME, *PROFILES, "Netflix", "Hulu", "email", "texts", "Safari"]))) + "."
 READY_SOUND = "/System/Library/Sounds/Tink.aiff"  # Brain is listening.
 HEARD_SOUND = "/System/Library/Sounds/Pop.aiff"  # Brain heard you and is working.
 
 speech = Speech()
+SPEAKER = USER_NAME or "You"  # Label for what the user said, in the console.
 
 
 # Said while Brain is talking, these cut it off.
@@ -65,13 +67,13 @@ STOP_TALKING = re.compile(r"\b(?:stop|quiet|enough|shut up|hold on|wait)\b", re.
 
 
 def interrupted(heard, spoken):
-    """True if Bruce said a stop word. The mic also hears Brain itself, so a stop word
+    """True if the user said a stop word. The mic also hears Brain itself, so a stop word
     that is in Brain's own sentence does not count."""
     return any(m.group(0).lower() not in spoken.lower() for m in STOP_TALKING.finditer(heard))
 
 
 def say(text, hear=None):
-    """Speak. With hear(), keep listening so Bruce can say "stop"; Control-C also stops it."""
+    """Speak. With hear(), keep listening so the user can say "stop"; Control-C also stops it."""
     print(f"[Brain] {text}")
     speech.start(text)
     try:
@@ -81,7 +83,7 @@ def say(text, hear=None):
         while speech.process.poll() is None:
             heard = hear()
             if heard and interrupted(heard, text):
-                print(f"[Bruce] {heard}  (stopped Brain)")
+                print(f"[{SPEAKER}] {heard}  (stopped Brain)")
                 speech.stop()
                 return True
         return False
@@ -92,13 +94,13 @@ def say(text, hear=None):
 
 
 def chime(sound):
-    """Bruce can't see the screen; sounds tell him when to talk and when Brain heard."""
+    """The user can't see the screen; sounds tell them when to talk and when Brain heard."""
     subprocess.Popen(["/usr/bin/afplay", sound])
 
 
-# Bruce's voiceprint: personal, so it lives outside the project folder.
+# the user's voiceprint: personal, so it lives outside the project folder.
 VOICEPRINT = Path.home() / "Library/Application Support/Brain/voiceprint.npy"
-# How alike a voice must be to Bruce's (0-1). Tune if he is ignored (lower it) or the
+# How alike a voice must be to the user's (0-1). Tune if they are ignored (lower it) or the
 # TV gets through (raise it); each request prints its score.
 VOICE_MATCH = float(os.environ.get("BRAIN_VOICE_MATCH", "0.72"))
 LEARN = re.compile(r"^(?:learn|remember|know) my voice", re.IGNORECASE)
@@ -146,13 +148,13 @@ STOP_PROMPT = "Stop. Wait. Enough. Brain, stop."
 
 def transcribe(audio, check_voice=True, prompt=VOCABULARY):
     """check_voice=False while Brain talks: the clip is mostly Brain's own voice, so a
-    voiceprint check would throw away Bruce's "stop" along with it."""
+    voiceprint check would throw away the user's "stop" along with it."""
     samples = to_samples(audio)
     speech = speech_seconds(samples)
     if speech < 0.3:
         return ""  # Not a voice: typing, a door, the dishwasher.
     if check_voice and not is_known_voice(samples, speech):
-        print("  (ignored: not Bruce's voice)")
+        print("  (ignored: not the enrolled voice)")
         return ""
     result = mlx_whisper.transcribe(
         samples, path_or_hf_repo=WHISPER_MODEL, language="en", initial_prompt=prompt,
@@ -177,7 +179,7 @@ def hallucinated(text):
 
 
 def enroll(recognizer, source, seconds=20):
-    """Learn Bruce's voice from about 20 seconds of him talking naturally."""
+    """Learn the user's voice from about 20 seconds of them talking naturally."""
     say("Let's learn your voice. After the chime, talk normally for about twenty "
         "seconds. Tell me about your day, or anything at all.")
     chime(READY_SOUND)
@@ -229,7 +231,7 @@ def ask_while_listening(brain, request, hear):
     while worker.is_alive() and not CANCEL.is_set():
         heard = hear()
         if heard and STOP_TALKING.search(heard):
-            print(f"[Bruce] {heard}  (stopped the task)")
+            print(f"[{SPEAKER}] {heard}  (stopped the task)")
             CANCEL.set()
     worker.join(timeout=30)  # Tools stop at their next step; a model reply is discarded.
     return None if CANCEL.is_set() else result.get("answer")
@@ -299,7 +301,7 @@ def main():
     brain_module.choose_model()
     print(f"Model: {brain_module.MODEL} at {LLM_URL} | Voice: {DEFAULT_VOICE} | Hearing: {WHISPER_MODEL}")
     recognizer = sr.Recognizer()
-    recognizer.pause_threshold = 1.8  # Room for Bruce to pause mid-sentence.
+    recognizer.pause_threshold = 1.8  # Room for the user to pause mid-sentence.
     mic = {}
 
     def listen(timeout=None, limit=30, check_voice=True, prompt=VOCABULARY):
@@ -316,7 +318,7 @@ def main():
     def confirm(question):
         say(question + " Say yes or no.")
         answer = listen(timeout=10)
-        print(f"[Bruce] {answer}")
+        print(f"[{SPEAKER}] {answer}")
         return bool(YES.match(answer))
 
     brain = Brain(confirm)
@@ -355,11 +357,11 @@ def main():
                 command, request = route(heard, active)
                 if command is None:
                     continue  # Background talk, TV, or silence.
-                print(f"[Bruce] {heard}")
+                print(f"[{SPEAKER}] {heard}")
                 chime(HEARD_SOUND)
                 last_request = time.time()
                 if command == "quit":
-                    say("Goodbye, Bruce.")
+                    say(f"Goodbye, {USER_NAME}." if USER_NAME else "Goodbye.")
                     return
                 if command == "learn":
                     enroll(recognizer, source)
@@ -375,7 +377,7 @@ def main():
                     chime(READY_SOUND)
                     continue
                 answer = ask_while_listening(brain, request, hear_while_talking)
-                if answer is None:  # Bruce said stop.
+                if answer is None:  # the user said stop.
                     if mic_on.is_set():
                         say("Okay, stopped.")
                         chime(READY_SOUND)

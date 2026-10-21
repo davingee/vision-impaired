@@ -24,6 +24,14 @@ CFLAGS="-I/opt/homebrew/include" LDFLAGS="-L/opt/homebrew/lib" \
 `requirements.txt` lists the direct dependencies; `requirements.lock.txt` pins
 the exact tested versions. The plugin expects the environment at `.venv`.
 
+Then add personal settings (name, home town, weather location, streaming
+profiles). They stay in `.env`, which is not committed:
+
+```sh
+cp .env.example .env
+open -e .env
+```
+
 Check it:
 
 ```sh
@@ -98,8 +106,8 @@ Brain starts `mlx_lm.server` on port 8765 itself. A model downloads on first use
 question with `BRAIN_MODEL=<name>`. To use another OpenAI-compatible server
 (LM Studio, Ollama), set `BRAIN_LLM_URL`.
 
-The user's name, home town, and streaming profiles are set in Brain's
-instructions in `scripts/brain.py` (`SYSTEM_PROMPT`) and in `scripts/browser.py`.
+The user's name, home town, weather location, and streaming profiles come from
+`.env` (step 1), for Brain and the ChatGPT plugin alike. Restart after changing it.
 
 ### Talking to Brain
 

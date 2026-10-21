@@ -5,10 +5,8 @@ import time
 from difflib import SequenceMatcher
 from urllib.parse import quote_plus, urlparse
 
-from common import checkpoint, jxa, run_command
+from common import BLOCKED_PROFILES, PROFILES, checkpoint, jxa, run_command
 
-# Other people's Netflix profiles. Bruce watches only as Scott or Bruce.
-OTHER_PROFILES = {"kids", "drew", "kyrie"}
 BROWSERS = {"chrome": "Google Chrome", "safari": "Safari"}
 # Safari by default: Chrome on this Mac is managed and locks page control.
 DEFAULT = os.environ.get("BRAIN_BROWSER", "safari")
@@ -57,7 +55,7 @@ def page(browser=DEFAULT, action="read", **params):
     except RuntimeError as exc:
         if "JavaScript" in str(exc):
             raise RuntimeError("Page control is off in this browser. It needs a one-time "
-                               f"setup by Scott, not Bruce: {JS_SETTING[browser]}") from exc
+                               f"setup by a helper, not the user: {JS_SETTING[browser]}") from exc
         raise
 
 
@@ -70,8 +68,8 @@ def read_page(browser=DEFAULT, max_chars=8000):
 def click_page(label, browser=DEFAULT):
     if not label.strip() or len(label) > 200:
         raise ValueError("Give the visible label of a link or button.")
-    if label.strip().lower() in OTHER_PROFILES:
-        raise ValueError("Use only the Scott or Bruce profile.")
+    if label.strip().lower() in BLOCKED_PROFILES:  # Other family members, Kids.
+        raise ValueError(f"That profile is off limits. Use {' or '.join(PROFILES) or 'the user’s own profile'}.")
     result = page(browser, "click", label=label.strip())
     if result.get("status") == "clicked":
         time.sleep(2.5)  # Let the next page load so the model can confirm, not guess.
@@ -98,7 +96,7 @@ SERVICES = {
                 "search": "https://www.netflix.com/search?q=",
                 "buttons": ("Resume", "Play")},
     # Hulu ignores ?q=, so its search box gets typed into instead.
-    # Hulu and Prime have no Bruce/Scott profile picker here; skipping it saves ~10 s.
+    # Hulu and Prime skip the profile picker (none set up for them); saves ~10 s.
     "hulu": {"profiles": None,
              "search": "https://www.hulu.com/search", "type_search": True,
              "buttons": ("Resume", "Watch Next Episode", "Keep Watching", "Continue",
@@ -136,7 +134,7 @@ def matching_titles(show, controls):
     return [c for c in usable if len(c) >= 3 and near(c) >= 0.75]
 
 
-def play_show(service, show, profile="Bruce", browser=DEFAULT):
+def play_show(service, show, profile=None, browser=DEFAULT):
     """Whole streaming flow in code, so a small model only has to name the show:
     pick the profile, search, open the best-matching title, press Resume or Play."""
     site = SERVICES.get(SERVICE_NAMES.get(service.strip().lower(), ""))
@@ -145,14 +143,16 @@ def play_show(service, show, profile="Bruce", browser=DEFAULT):
     show = show.strip()
     if not show:
         raise ValueError("Say which show to play.")
-    if profile.strip().lower() not in {"bruce", "scott"}:
-        raise ValueError("Use only the Scott or Bruce profile.")
-    profile = profile.strip().title()
-    if site["profiles"]:
+    allowed = {name.lower(): name for name in PROFILES}
+    profile = (profile or (PROFILES[0] if PROFILES else "")).strip()
+    if allowed and profile.lower() not in allowed:
+        raise ValueError(f"Use only the {' or '.join(PROFILES)} profile.")
+    profile = allowed.get(profile.lower(), profile)
+    if site["profiles"] and profile:
         open_url(site["profiles"], browser)
         if wait_for(lambda controls: profile in controls, browser, seconds=6):
             click_page(profile, browser)
-    first = not site["profiles"]  # The first page opens a new tab; the rest reuse it.
+    first = not (site["profiles"] and profile)  # First page opens a new tab; rest reuse it.
     if site.get("type_search"):
         open_url(site["search"], browser, same_tab=not first)
         page(browser, "type", text=show)
@@ -165,7 +165,7 @@ def play_show(service, show, profile="Bruce", browser=DEFAULT):
     candidates = wait_for(lambda controls: matching_titles(show, controls), browser)
     if not candidates:
         return {"status": "not_found", "show": show,
-                "note": "The search showed no title with those words. Is Bruce signed in?"}
+                "note": "The search showed no title with those words. Is the service signed in?"}
     # "Blacklist" should pick "The Blacklist", not "The Wake: Blacklist".
     # Hulu labels read "High Potential High Potential SERIES": a title that starts with
     # the show's name wins first, then the closest overall match.
@@ -180,7 +180,7 @@ def play_show(service, show, profile="Bruce", browser=DEFAULT):
                 "note": "Opened the show but found no button I know. If one of buttons_seen "
                         "plays it, press it with click_web_page."}
     active = read_page(browser, 100).get("active_profile")  # Netflix only; read before playing.
-    if active and active != profile:
+    if active and profile and active != profile:
         return {"status": "wrong_profile", "active_profile": active, "wanted": profile,
                 "note": "The service is on a different profile; nothing was played."}
     checkpoint()
@@ -190,7 +190,7 @@ def play_show(service, show, profile="Bruce", browser=DEFAULT):
     opened = playing or after.get("url", "") != before or "/watch" in after.get("url", "")
     return {"status": "playing" if playing else "video_opened" if opened else "not_confirmed",
             "show": title, "profile": active or profile, "pressed": button,
-            "note": "A video is playing; ask Bruce if he hears it." if playing else
+            "note": "A video is playing; ask the user if they hear it." if playing else
                     "The video page opened but isn't playing yet." if opened else
                     "Pressed the button but nothing changed."}
 

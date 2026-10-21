@@ -10,7 +10,7 @@ def friendly(message):
     name, address = parseaddr(message.get("sender", ""))
     message["sender"], message["sender_email"] = name or address, address
     if message.get("received"):
-        # mail.js reports UTC; Bruce needs his own clock time.
+        # mail.js reports UTC; the user needs their own clock time.
         when = datetime.fromisoformat(message["received"].replace("Z", "+00:00")).astimezone()
         day = "today" if when.date() == datetime.now().date() else when.strftime("%A %B %-d")
         message["received"] = f"{day} at {when.strftime('%-I:%M %p')}"

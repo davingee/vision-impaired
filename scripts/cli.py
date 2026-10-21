@@ -1,4 +1,4 @@
-"""Bruce command line: run any tool from Terminal (mail, texts, shows, web, files, speech).
+"""Command line: run any tool from Terminal (mail, texts, shows, web, files, speech).
 
 Sends texts only when confirmed. No email sending.
 """
@@ -72,7 +72,7 @@ def main():
     p = add("watch", lambda a: play_show(a.service, a.show, a.profile))
     p.add_argument("service", help="netflix, hulu, or prime")
     p.add_argument("show")
-    p.add_argument("--profile", default="Bruce")
+    p.add_argument("--profile", help="default: first of BRAIN_PROFILES")
     p = add("search", lambda a: web_search(a.query, a.browser))
     p.add_argument("query")
     p = add("tabs", lambda a: browser_tabs(a.browser))

@@ -15,13 +15,13 @@ APPLE_EPOCH = datetime(2001, 1, 1, tzinfo=timezone.utc)
 
 
 def query(db, sql, args=()):
-    # Read-only: Bruce never writes Apple's databases.
+    # Read-only: this project never writes Apple's databases.
     try:
         with closing(sqlite3.connect(f"{db.as_uri()}?mode=ro", uri=True)) as con:
             return con.execute(sql, args).fetchall()
     except sqlite3.OperationalError as exc:
         raise RuntimeError(f"Cannot read {db.name} ({exc}). "
-                           "Give the app running Bruce Full Disk Access.") from exc
+                           "Give the app running the assistant Full Disk Access.") from exc
 
 
 CONTACTS_SQL = """

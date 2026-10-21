@@ -1,10 +1,11 @@
-"""Forecast from the National Weather Service API (free, no key). Defaults to Helena, MT."""
+"""Forecast from the National Weather Service API (free, no key) for the home location in .env."""
 import json
 import urllib.request
 
-HELENA = (46.5891, -112.0391)
+from common import HOME_LATITUDE, HOME_LONGITUDE
+
 # api.weather.gov asks every caller to identify itself.
-HEADERS = {"User-Agent": "Bruce accessibility assistant (local, personal use)",
+HEADERS = {"User-Agent": "Low-vision Mac assistant (local, personal use)",
            "Accept": "application/geo+json"}
 
 
@@ -14,7 +15,11 @@ def get_json(url):
         return json.load(response)
 
 
-def forecast(periods=4, latitude=HELENA[0], longitude=HELENA[1]):
+def forecast(periods=4, latitude=None, longitude=None):
+    latitude = float(latitude if latitude is not None else HOME_LATITUDE or "nan")
+    longitude = float(longitude if longitude is not None else HOME_LONGITUDE or "nan")
+    if latitude != latitude or longitude != longitude:  # NaN: not set.
+        raise ValueError("Set BRAIN_HOME_LATITUDE and BRAIN_HOME_LONGITUDE in .env.")
     if not 1 <= periods <= 14:
         raise ValueError("periods must be 1–14 (each is a day or a night).")
     try:

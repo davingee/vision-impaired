@@ -1,4 +1,4 @@
-"""Bruce's local stdio MCP server. No network listener."""
+"""Local stdio MCP server for the low-vision Mac assistant. No network listener."""
 import atexit
 from contextlib import asynccontextmanager
 from mcp.server.fastmcp import FastMCP
@@ -50,25 +50,25 @@ def list_voices() -> list[str]:
 
 @mcp.tool()
 def speak_text(text: str, voice: str = DEFAULT_VOICE, rate: int = 175) -> dict:
-    """Read supplied text aloud locally, replacing Bruce's prior speech. AI voice."""
+    """Read supplied text aloud locally, replacing this server's prior speech. AI voice."""
     return speech.start(text, voice, rate)
 
 
 @mcp.tool()
 def pause_speech() -> dict:
-    """Pause only speech started by this Bruce server."""
+    """Pause only speech started by this server."""
     return speech.pause()
 
 
 @mcp.tool()
 def resume_speech() -> dict:
-    """Resume Bruce's paused speech."""
+    """Resume this server's paused speech."""
     return speech.resume()
 
 
 @mcp.tool()
 def stop_speech() -> dict:
-    """Stop only Bruce's speech."""
+    """Stop only this server's speech."""
     return speech.stop()
 
 
@@ -125,7 +125,7 @@ def send_text_message(chat_id: int, text: str, user_confirmed: bool = False) -> 
 
 @mcp.tool()
 def get_weather(periods: int = 4) -> dict:
-    """National Weather Service forecast for Helena, MT. Each period is a day or night;
+    """National Weather Service forecast for the user's home. Each period is a day or night;
     4 covers today through tomorrow night."""
     return forecast(periods)
 
@@ -138,9 +138,9 @@ def search_web(query: str, browser: str = DEFAULT_BROWSER) -> dict:
 
 
 @mcp.tool()
-def play_tv_show(service: str, show: str, profile: str = "Bruce") -> dict:
-    """Start a show on 'netflix', 'hulu', or 'prime video' with the Bruce (default) or
-    Scott profile: picks the profile, searches, opens the title, and presses Resume or
+def play_tv_show(service: str, show: str, profile: str | None = None) -> dict:
+    """Start a show on 'netflix', 'hulu', or 'prime video'. profile defaults to the
+    user's own (settings); only approved profiles are allowed. Picks the profile, searches, opens the title, and presses Resume or
     Play (next episode). Never buys or rents. Use this for any request to watch a show."""
     return play_show(service, show, profile)
 

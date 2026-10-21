@@ -123,7 +123,8 @@ echo "Hello there" | .venv/bin/python scripts/cli.py speak
 
 ## Requirements
 
-Apple Silicon Mac, Python 3.12, and Homebrew `portaudio`. Python packages are in
+Apple Silicon Mac, Python 3.12, and Homebrew `portaudio`. Personal settings (name,
+home town, weather location, streaming profiles) go in `.env`; see `.env.example`. Python packages are in
 `requirements.txt` (ranges) and `requirements.lock.txt` (tested versions).
 Permissions: Full Disk Access (texts, contacts), Automation (Mail, Messages,
 browsers), Microphone, and "Allow JavaScript from Apple Events" in the browser.

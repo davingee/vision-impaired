@@ -115,10 +115,11 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(
             brain.run_tool("speak_text", {"text": "hi"})["status"], "error"
         )
-        for label in ("Kids", " drew "):
-            self.assertEqual(
-                brain.run_tool("click_web_page", {"label": label})["status"], "error"
-            )  # Refused by browser.click_page before any click.
+        with patch("browser.BLOCKED_PROFILES", {"kids", "drew"}):
+            for label in ("Kids", " drew "):
+                self.assertEqual(
+                    brain.run_tool("click_web_page", {"label": label})["status"], "error"
+                )  # Refused by browser.click_page before any click.
 
     def test_replies_spell_out_abbreviations_for_listening(self):
         from brain import plain
@@ -280,6 +281,8 @@ class ToolTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             from browser import play_show
             play_show("youtube tv", "News")
+        with patch("browser.PROFILES", ["Pat"]), self.assertRaises(ValueError):
+            play_show("netflix", "News", profile="Kyrie")  # Not an approved profile.
 
     def test_show_titles_match_despite_mishearing(self):
         from browser import matching_titles

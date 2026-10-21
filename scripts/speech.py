@@ -19,7 +19,7 @@ KOKORO_MODEL = "mlx-community/Kokoro-82M-bf16"
 KOKORO_VOICES = ["af_heart", "af_bella", "af_nicole", "am_michael", "am_fenrir",
                  "bf_emma", "bm_george"]
 _kokoro = None
-# Kokoro's helpers log pronunciation and download chatter; Bruce's console needs none of it.
+# Kokoro's helpers log pronunciation and download chatter; the user's console needs none of it.
 for noisy in ("httpx", "huggingface_hub", "misaki"):
     logging.getLogger(noisy).setLevel(logging.ERROR)
 # phonemizer resets its own level on every use; disabling sticks. Its "words count
@@ -83,7 +83,7 @@ class Speech:
                 try:
                     self.source = kokoro_wav(text, voice.removeprefix("kokoro:"), rate)
                     command = ["/usr/bin/afplay", self.source.name]
-                except Exception as exc:  # Never leave Bruce in silence.
+                except Exception as exc:  # Never leave the user in silence.
                     print(f"Kokoro failed ({exc}); using {FALLBACK_VOICE}.", file=sys.stderr)
                     voice = FALLBACK_VOICE
             if not voice.startswith("kokoro:"):
