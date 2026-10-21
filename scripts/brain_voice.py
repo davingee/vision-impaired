@@ -129,7 +129,7 @@ def voice_embedding(samples):
     return _encoder.embed_utterance(samples)
 
 
-def is_bruce(samples, speech):
+def is_known_voice(samples, speech):
     """True unless a voiceprint exists and this clearly is someone else. Under a second
     of speech ("yes", "stop") is too short to judge, so it passes."""
     if not VOICEPRINT.exists() or speech < 1.0:
@@ -151,7 +151,7 @@ def transcribe(audio, check_voice=True, prompt=VOCABULARY):
     speech = speech_seconds(samples)
     if speech < 0.3:
         return ""  # Not a voice: typing, a door, the dishwasher.
-    if check_voice and not is_bruce(samples, speech):
+    if check_voice and not is_known_voice(samples, speech):
         print("  (ignored: not Bruce's voice)")
         return ""
     result = mlx_whisper.transcribe(

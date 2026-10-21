@@ -1,9 +1,11 @@
 {
   "mcpServers": {
-    "bruce": {
+    "low-vision-mac": {
       "type": "stdio",
       "command": "/Users/scott/code/bruce/.venv/bin/python",
-      "args": ["/Users/scott/code/bruce/scripts/server.py"]
+      "args": [
+        "/Users/scott/code/bruce/scripts/server.py"
+      ]
     }
   }
 }

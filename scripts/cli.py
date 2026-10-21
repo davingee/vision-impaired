@@ -1,4 +1,4 @@
-"""Bruce command line: mail, texts, browser, files, speech.
+"""Bruce command line: run any tool from Terminal (mail, texts, shows, web, files, speech).
 
 Sends texts only when confirmed. No email sending.
 """

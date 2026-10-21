@@ -62,12 +62,12 @@ Browser page reading and clicking also need one setting in each browser:
 ## 4. Connect to ChatGPT (plugin)
 
 1. Quit and reopen the ChatGPT desktop app.
-2. Open Plugins and choose the local source **Bruce — Mac assistance**.
-3. Install **bruce** and start a new conversation with it enabled.
+2. Open Plugins and choose the local source **Low Vision — Mac assistance**.
+3. Install **low-vision-mac** and start a new conversation with it enabled.
 4. Ask: "Use Bruce to check this Mac," then "Read my latest email."
 
 The plugin starts `scripts/server.py` with `.venv/bin/python` (paths in
-`plugins/bruce/.mcp.json`). If this folder moves, update those paths and
+`plugins/low-vision-mac/.mcp.json`). If this folder moves, update those paths and
 reinstall the plugin. After changing tools, restart ChatGPT.
 
 ## 5. Local voice assistant (optional)

@@ -10,11 +10,11 @@ from mail import mail
 from speech import Speech
 
 
-class BruceTests(unittest.TestCase):
+class ToolTests(unittest.TestCase):
     def test_text_is_not_executed_and_truncation_is_reported(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "message.txt"
-            path.write_text('$(touch unwanted)\nHello "Dad" — café', encoding="utf-8")
+            path.write_text('$(touch unwanted)\nHello "Pat" — café', encoding="utf-8")
             result = read_text_file(str(path), 10)
             self.assertTrue(result["truncated"])
             self.assertEqual(result["text"], "$(touch un")
@@ -23,7 +23,7 @@ class BruceTests(unittest.TestCase):
     def test_mail_payload_is_json_not_source(self):
         import json
 
-        text = '"; throw Error("injection"); //\nHello Dad'
+        text = '"; throw Error("injection"); //\nHello Pat'
 
         def fake_run(args, **kwargs):
             payload = json.loads(Path(args[-1]).read_text())
@@ -57,7 +57,7 @@ class BruceTests(unittest.TestCase):
         self.assertEqual(message_text(None, blob), long_text)
         self.assertEqual(message_text("plain", blob), "plain")
         self.assertEqual(handle_key("+1 (555) 123-4567"), handle_key("5551234567"))
-        self.assertEqual(handle_key("Dad@Example.com "), "dad@example.com")
+        self.assertEqual(handle_key("Pat@Example.com "), "pat@example.com")
 
     def test_send_text_requires_confirmation_before_any_action(self):
         from texts import send_text
@@ -92,7 +92,7 @@ class BruceTests(unittest.TestCase):
                 open_url("https://www.hulu.com", "firefox")
             run.assert_not_called()
 
-    def test_local_brain_sends_only_after_bruces_yes(self):
+    def test_local_brain_sends_only_after_users_yes(self):
         import brain
 
         answers = []
@@ -212,9 +212,9 @@ class BruceTests(unittest.TestCase):
         self.assertEqual(brain_voice.route("Hey Brain, remember my voice", False), ("learn", ""))
         # With no voiceprint saved, every voice is accepted.
         with patch.object(brain_voice, "VOICEPRINT", Path("/nonexistent/voiceprint.npy")):
-            self.assertTrue(brain_voice.is_bruce(np.zeros(16000, np.float32), 3.0))
+            self.assertTrue(brain_voice.is_known_voice(np.zeros(16000, np.float32), 3.0))
         # Too short to judge ("yes", "stop") passes without loading the voice model.
-        self.assertTrue(brain_voice.is_bruce(np.zeros(8000, np.float32), 0.5))
+        self.assertTrue(brain_voice.is_known_voice(np.zeros(8000, np.float32), 0.5))
 
     def test_repeated_action_call_runs_once(self):
         import brain
@@ -238,10 +238,11 @@ class BruceTests(unittest.TestCase):
                 return b"\0" * size
 
         source = type("Source", (), {"stream": Stream()})()
-        brain_voice.stop_reads_when_off(source)
-        self.assertEqual(len(source.stream.read(4)), 4)
+        # A temporary flag file, never the real one the hotkey uses.
         with tempfile.TemporaryDirectory() as folder, \
              patch.object(brain_voice, "MIC_OFF_FLAG", Path(folder) / "mic_off"):
+            brain_voice.stop_reads_when_off(source)
+            self.assertEqual(len(source.stream.read(4)), 4)
             brain_voice.mic_on.clear()
             with self.assertRaises(brain_voice.MicOff):
                 source.stream.read(4)

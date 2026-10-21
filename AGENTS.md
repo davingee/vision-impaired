@@ -1,7 +1,7 @@
 # Bruce accessibility workflows
 
 Use the local scripts in this folder for requested Mac actions.
-Run `.venv/bin/python scripts/bruce.py --help` to inspect the command interface.
+Run `.venv/bin/python scripts/cli.py --help` to inspect the command interface.
 The MCP equivalent is `scripts/server.py`.
 
 - Keep spoken responses short. Ask one question at a time.

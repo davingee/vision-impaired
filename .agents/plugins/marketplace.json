@@ -1,14 +1,14 @@
 {
-  "name": "bruce-local",
+  "name": "low-vision-local",
   "interface": {
-    "displayName": "Bruce — Mac assistance"
+    "displayName": "Low Vision — Mac assistance"
   },
   "plugins": [
     {
-      "name": "bruce",
+      "name": "low-vision-mac",
       "source": {
         "source": "local",
-        "path": "./plugins/bruce"
+        "path": "./plugins/low-vision-mac"
       },
       "policy": {
         "installation": "AVAILABLE",
