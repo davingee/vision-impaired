@@ -12,7 +12,7 @@ Run: .venv/bin/python scripts/brain_voice.py
 
 from dotenv import load_dotenv
 
-load_dotenv()  # For BRUCE_MODEL, BRUCE_VOICE, and BRUCE_LLM_URL.
+load_dotenv()  # For BRAIN_MODEL, BRAIN_VOICE, and BRAIN_LLM_URL.
 
 import os
 import re
@@ -97,10 +97,10 @@ def chime(sound):
 
 
 # Bruce's voiceprint: personal, so it lives outside the project folder.
-VOICEPRINT = Path.home() / "Library/Application Support/Bruce/voiceprint.npy"
+VOICEPRINT = Path.home() / "Library/Application Support/Brain/voiceprint.npy"
 # How alike a voice must be to Bruce's (0-1). Tune if he is ignored (lower it) or the
 # TV gets through (raise it); each request prints its score.
-VOICE_MATCH = float(os.environ.get("BRUCE_VOICE_MATCH", "0.72"))
+VOICE_MATCH = float(os.environ.get("BRAIN_VOICE_MATCH", "0.72"))
 LEARN = re.compile(r"^(?:learn|remember|know) my voice", re.IGNORECASE)
 _vad, _encoder = None, None
 
@@ -238,7 +238,7 @@ def ask_while_listening(brain, request, hear):
 # Control-Option-Command-B runs scripts/toggle_brain_mic.sh, which creates or
 # deletes this file (and plays the sound). A file, not a signal: it works no matter
 # what Brain is busy with.
-MIC_OFF_FLAG = Path.home() / "Library/Application Support/Bruce/mic_off"
+MIC_OFF_FLAG = Path.home() / "Library/Application Support/Brain/mic_off"
 
 
 class MicSwitch:

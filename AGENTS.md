@@ -1,4 +1,4 @@
-# Bruce accessibility workflows
+# Low-vision Mac assistant: agent instructions
 
 Use the local scripts in this folder for requested Mac actions.
 Run `.venv/bin/python scripts/cli.py --help` to inspect the command interface.
@@ -26,6 +26,6 @@ The MCP equivalent is `scripts/server.py`.
 - User preference: free speech only; no paid TTS API. Prefer ChatGPT's built-in
   voice for conversation when available. Use speak_text (Kokoro, local and free;
   Ava Premium is the backup) for read-aloud requests needing playback controls.
-- Do not speak through Bruce's speech tools at the same time as ChatGPT's voice.
-- Bruce's pause/resume controls affect its own speech only, not ChatGPT's native voice.
+- Do not speak through this project's speech tools at the same time as ChatGPT's voice.
+- This project's pause/resume controls affect its own speech only, not ChatGPT's native voice.
   Native voice supports interruption; exact-position pause/resume is unverified.

@@ -12,7 +12,7 @@ from contextlib import redirect_stdout
 
 from common import run_command
 
-DEFAULT_VOICE = os.environ.get("BRUCE_VOICE", "kokoro:af_heart")
+DEFAULT_VOICE = os.environ.get("BRAIN_VOICE", "kokoro:af_heart")
 FALLBACK_VOICE = "Ava (Premium)"
 KOKORO_MODEL = "mlx-community/Kokoro-82M-bf16"
 # A few of Kokoro's English voices: a = American, b = British; f = female, m = male.

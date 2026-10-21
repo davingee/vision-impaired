@@ -23,15 +23,15 @@ from texts import chat_title
 
 # MLX (Apple's machine-learning library) runs the model natively on Apple Silicon.
 # brain.py starts `mlx_lm.server` itself if it is not already running.
-# Picked at startup by choose_model(); BRUCE_MODEL skips the question.
+# Picked at startup by choose_model(); BRAIN_MODEL skips the question.
 MODELS = [
     ("Qwen/Qwen3-8B-MLX-6bit", "Qwen3 8B, Qwen's own MLX build. Good on a 16 GB Mac."),
     ("mlx-community/Qwen3-8B-4bit", "Qwen3 8B, smaller and a bit faster."),
     ("mlx-community/Qwen3-30B-A3B-Instruct-2507-4bit", "Qwen3 30B-A3B. Smarter; needs 32 GB."),
     ("mlx-community/Qwen3.6-35B-A3B-4bit", "Qwen3.6 35B-A3B. Smartest; needs 32 GB."),
 ]
-MODEL = os.environ.get("BRUCE_MODEL", MODELS[0][0])
-LLM_URL = os.environ.get("BRUCE_LLM_URL", "http://127.0.0.1:8765/v1/chat/completions")
+MODEL = os.environ.get("BRAIN_MODEL", MODELS[0][0])
+LLM_URL = os.environ.get("BRAIN_LLM_URL", "http://127.0.0.1:8765/v1/chat/completions")
 KEEP_TURNS = 12  # Older turns are forgotten so long emails don't crowd out rules.
 MAX_STEPS = 8
 MAX_RESULT_CHARS = 8000
@@ -108,7 +108,7 @@ def downloaded(model):
 def choose_model():
     """Ask which MLX model to run; Enter keeps the default. Sets MODEL."""
     global MODEL
-    if os.environ.get("BRUCE_MODEL"):
+    if os.environ.get("BRAIN_MODEL"):
         return MODEL
     print("Which model should Brain use?")
     for number, (name, note) in enumerate(MODELS, 1):

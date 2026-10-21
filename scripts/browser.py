@@ -11,7 +11,7 @@ from common import checkpoint, jxa, run_command
 OTHER_PROFILES = {"kids", "drew", "kyrie"}
 BROWSERS = {"chrome": "Google Chrome", "safari": "Safari"}
 # Safari by default: Chrome on this Mac is managed and locks page control.
-DEFAULT = os.environ.get("BRUCE_BROWSER", "safari")
+DEFAULT = os.environ.get("BRAIN_BROWSER", "safari")
 JS_SETTING = {
     "chrome": "In Chrome: View › Developer › Allow JavaScript from Apple Events.",
     "safari": "In Safari: Settings › Advanced › Show features for web developers, "
