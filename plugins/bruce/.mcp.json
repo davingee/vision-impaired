@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bruce": {
+      "command": "/Users/scott/code/bruce/.venv/bin/python",
+      "args": ["/Users/scott/code/bruce/scripts/server.py"]
+    }
+  }
+}

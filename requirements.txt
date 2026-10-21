@@ -1,0 +1,12 @@
+# Python 3.12. PyAudio needs Homebrew portaudio (brew install portaudio).
+mcp>=1.12,<2               # ChatGPT/Codex plugin tools (scripts/server.py)
+SpeechRecognition>=3.10,<4 # Microphone capture and pause detection (scripts/brain_voice.py)
+PyAudio>=0.2.14,<0.3       # Microphone access for SpeechRecognition
+mlx-whisper>=0.4,<0.5      # Local speech-to-text on Apple Silicon
+mlx-audio>=0.2,<1          # Kokoro natural local voice (scripts/speech.py)
+misaki[en]>=0.9,<1         # Kokoro English pronunciation
+python-dotenv
+mlx-lm>=0.30,<1             # Local language model on Apple Silicon (scripts/brain.py)
+silero-vad>=5,<7            # Is it a human voice? Rejects typing and noise
+resemblyzer>=0.1.4,<0.2     # Voiceprint: answer Bruce, ignore other voices
+setuptools<81               # resemblyzer still imports pkg_resources

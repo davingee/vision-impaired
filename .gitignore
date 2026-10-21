@@ -1,0 +1,88 @@
+# ==============================================================================
+# Python Core & Bytecode
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ==============================================================================
+# Environments and Package Management
+# ==============================================================================
+# Virtual environments (Standard & Common naming conventions)
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Poetry, Pipenv, and dependency tracking
+.chunks/
+.pip-wheel-house/
+
+# ==============================================================================
+# Distribution / Packaging
+# ==============================================================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==============================================================================
+# Testing, Coverage, and Code Quality
+# ==============================================================================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ==============================================================================
+# Jupyter Notebooks
+# ==============================================================================
+.ipynb_checkpoints
+
+# ==============================================================================
+# Secrets and Environment Variables
+# ==============================================================================
+# NEVER commit raw secrets or local production configuration overrides
+.env
+.env.*
+! .env.example
+local_settings.py
+
+# ==============================================================================
+# IDEs and System Files (Optional but highly recommended)
+# ==============================================================================
+# JetBrains / PyCharm
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Operating System specific files
+.DS_Store
+Thumbs.db

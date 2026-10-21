@@ -1,0 +1,10 @@
+name: bruce
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - portaudio
+  - pyaudio
+  - requests
+  - speechrecognition
