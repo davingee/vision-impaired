@@ -74,14 +74,19 @@ For TV, sign in to Netflix, Hulu, and Prime Video in Safari once.
 
 ## 4. Connect to ChatGPT (plugin)
 
-1. Quit and reopen the ChatGPT desktop app.
-2. Open Plugins and choose the local source **Low Vision — Mac assistance**.
-3. Install **low-vision-mac** and start a new conversation with it enabled.
-4. Ask: "Check this Mac," then "Read my latest email."
+1. Point the plugin at this folder (writes `plugins/low-vision-mac/.mcp.json`
+   with this Mac's full paths; run it again if the folder ever moves):
 
-The plugin starts `scripts/server.py` with `.venv/bin/python`, using the full
-paths in `plugins/low-vision-mac/.mcp.json`. If this folder moves, update those
-paths and reinstall the plugin. After changing tools, restart ChatGPT.
+   ```sh
+   .venv/bin/python scripts/configure_plugin.py
+   ```
+
+2. Quit and reopen the ChatGPT desktop app.
+3. Open Plugins and choose the local source **Low Vision — Mac assistance**.
+4. Install **low-vision-mac** and start a new conversation with it enabled.
+5. Ask: "Check this Mac," then "Read my latest email."
+
+After changing tools or settings, restart ChatGPT.
 
 ## 5. Local voice assistant (optional)
 
@@ -146,8 +151,12 @@ turns it back on. You hear Purr (off) or Glass (on), then Brain says
 
 1. Shortcuts › new shortcut named **Brain Microphone**.
 2. Add **Run Shell Script** and enter the full path to
-   `scripts/toggle_brain_mic.sh` in this folder, for example
-   `/Users/you/brain/scripts/toggle_brain_mic.sh`.
+   `scripts/toggle_brain_mic.sh`. To get it, run this from the project folder
+   and paste the result:
+
+   ```sh
+   echo "$PWD/scripts/toggle_brain_mic.sh"
+   ```
 3. Click **ⓘ** (Shortcut Details) › **Add Keyboard Shortcut**, then press
    Control-Option-Command-B. (If that button is missing: turn on **Use as Quick
    Action** › **Services Menu**, then set the key in System Settings › Keyboard ›
