@@ -1,4 +1,5 @@
-// JXA uses Mail's installed scripting dictionary. No email-sending operation.
+// JXA uses Mail's installed scripting dictionary. Sends only replies, only when mail.py
+// confirms the user said yes.
 ObjC.import("Foundation");
 
 function run(argv) {
@@ -47,6 +48,25 @@ function run(argv) {
         return JSON.stringify({status: "draft_created", sent: false, original_id: request.id,
             draft_id: draft.id(), subject: draft.subject(),
             to: draft.toRecipients.address(), body: draft.content()});
+    }
+    if (request.action === "send") {
+        if (request.confirmed !== true) throw Error("Reply not confirmed by the user.");
+        if (typeof request.text !== "string" || !request.text.trim() || request.text.length > 20000)
+            throw Error("Reply must contain 1–20,000 characters.");
+        const reply = mail.reply(message, {openingWindow: false, replyToAll: false});
+        reply.content = request.text + "\n\n" + reply.content();
+        const subject = reply.subject(), to = reply.toRecipients.address();
+        const started = new Date(Date.now() - 60000);
+        mail.send(reply);
+        // Mail gives no result; the Sent mailbox shows whether it really went out.
+        for (let i = 0; i < 20; i++) {
+            delay(1);
+            const sent = mail.sentMailbox.messages.whose({subject: subject})();
+            if (sent.some(m => m.dateSent() >= started))
+                return JSON.stringify({status: "sent", to: to, subject: subject});
+        }
+        return JSON.stringify({status: "pending", to: to, subject: subject,
+            note: "Handed to Mail; not yet in the Sent mailbox."});
     }
     throw Error("Unknown Mail action.");
 }

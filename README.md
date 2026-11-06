@@ -21,8 +21,9 @@ Both use the same tool code, so a fix in one place reaches both.
 
 ## What it can do
 
-- **Mail** (Apple Mail): list the newest messages with inbox totals, read one, and
-  draft a reply. It never sends email.
+- **Mail** (Apple Mail): list the newest messages with inbox totals, read one,
+  draft a reply, or send a reply after a spoken read-back and a "yes". It only
+  replies to emails already received; it never writes to a new address.
 - **Texts** (Messages): list conversations with real unread counts, read a
   conversation, and send a reply after a spoken read-back and a "yes".
 - **Contacts**: look up a person's phone numbers and email addresses.
@@ -34,6 +35,8 @@ Both use the same tool code, so a fix in one place reaches both.
 - **Weather**: National Weather Service forecast for a home location (free, no key).
 - **Files**: search like Spotlight (Command-Space), open, and read text files.
 - **Speech**: read text aloud with pause, resume, and stop.
+- **Remote help**: "I need help" reconnects Tailscale, checks Screen Sharing, and
+  (after a "yes") texts a family helper a link to connect to the screen.
 
 ## Talking to Brain
 
@@ -54,9 +57,10 @@ make interrupting it much more reliable.
 
 ## Safety
 
-- Texts are sent only after the recipient and exact words are read aloud and the
-  user says "yes". This is enforced in code, not left to the model.
-- Email is never sent; replies are saved as drafts.
+- Texts and email replies are sent only after the recipient and exact words are
+  read aloud and the user says "yes". This is enforced in code, not left to the
+  model. Sending is then confirmed from Messages or Mail's Sent mailbox.
+- Email can only answer a received message, so the model never types an address.
 - Streaming never buys, rents, or subscribes, and uses only approved profiles.
 - Apple's Mail, Messages, and Contacts data are opened read-only.
 - Email, text, web page, and file contents are treated as information, never as

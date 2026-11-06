@@ -172,7 +172,15 @@ def play_show(service, show, profile=None, browser=DEFAULT):
     title = max(candidates, key=lambda c: (c.lower().startswith(show.lower()),
                                            SequenceMatcher(None, show.lower(), c.lower()).ratio()))
     checkpoint()
+    search_url = read_page(browser, 100)["url"]
     details = click_page(title, browser)
+    if details.get("now_showing", {}).get("url") == search_url:
+        # Still on the results (Prime): press the button inside this show's own card, not
+        # the first Play button on the page, which belongs to another show.
+        card = page(browser, "press_in_card", label=title, prefixes=list(site["buttons"]),
+                    never=NEVER_PRESS.pattern)
+        if card.get("status") == "clicked":
+            return finish_playing(browser, title, show, profile, card["label"], search_url)
     button = wait_for(lambda controls: play_button(controls, site["buttons"]), browser)
     if not button:
         seen = [c for c in read_page(browser, 100)["controls"] if not NEVER_PRESS.search(c)]
@@ -185,14 +193,33 @@ def play_show(service, show, profile=None, browser=DEFAULT):
                 "note": "The service is on a different profile; nothing was played."}
     checkpoint()
     before = read_page(browser, 100)["url"]
-    after = click_page(button, browser).get("now_showing", {})
+    click_page(button, browser)
+    return finish_playing(browser, title, show, active or profile, button, before)
+
+
+def shows_title(title, screen):
+    """All words of the matched title (as the site lists it) are on screen. "NCIS" alone
+    would also match "NCIS: Tony & Ziva", so every word must be there."""
+    filler = {"series", "movie", "season", "the", "and", "episode"}
+    words = {w for w in re.findall(r"[a-z0-9]+", title.lower()) if len(w) > 1} - filler
+    return all(w in screen.lower() for w in words)
+
+
+def finish_playing(browser, title, show, profile, button, before):
+    """After pressing play: is a video playing, and is it the right show?"""
     playing = wait_for_video(browser)
-    opened = playing or after.get("url", "") != before or "/watch" in after.get("url", "")
-    return {"status": "playing" if playing else "video_opened" if opened else "not_confirmed",
-            "show": title, "profile": active or profile, "pressed": button,
-            "note": "A video is playing; ask the user if they hear it." if playing else
-                    "The video page opened but isn't playing yet." if opened else
-                    "Pressed the button but nothing changed."}
+    now = read_page(browser, 3000)
+    opened = playing or now["url"] != before or "/watch" in now["url"]
+    # Players show the show's name; if it's missing, the wrong card may have been pressed.
+    right_show = shows_title(title, now["text"] + " " + now["title"])
+    status = "playing" if playing else "video_opened" if opened else "not_confirmed"
+    note = ("A video is playing; ask the user if they hear it." if playing else
+            "The video page opened but isn't playing yet." if opened else
+            "Pressed the button but nothing changed.")
+    if opened and not right_show:
+        status, note = "maybe_wrong_show", (f"Something started, but the screen doesn't show "
+                                            f"'{show}'. Tell the user and ask if it's right.")
+    return {"status": status, "show": title, "profile": profile, "pressed": button, "note": note}
 
 
 def wait_for_video(browser, seconds=10):

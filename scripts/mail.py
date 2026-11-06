@@ -1,4 +1,4 @@
-"""Apple Mail through mail.js. No email sending."""
+"""Apple Mail through mail.js. Replies are sent only after the user confirms."""
 from datetime import datetime
 from email.utils import parseaddr
 
@@ -15,6 +15,15 @@ def friendly(message):
         day = "today" if when.date() == datetime.now().date() else when.strftime("%A %B %-d")
         message["received"] = f"{day} at {when.strftime('%-I:%M %p')}"
     return message
+
+
+def send_reply(message_id, text, confirmed=False):
+    """Reply to an inbox message. Replies only: the recipient comes from that message,
+    never from the model."""
+    if not confirmed:
+        raise ValueError("Read the recipient, subject, and exact text back; send only "
+                         "after the user says yes.")
+    return mail("send", id=message_id, text=text, confirmed=True)
 
 
 def mail(action, **params):

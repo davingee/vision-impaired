@@ -30,6 +30,23 @@ function inPage(request) {
         field.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", code: "Enter", keyCode: 13, bubbles: true}));
         return JSON.stringify({status: "typed"});
     }
+    if (request.action === "press_in_card") {
+        // Search pages (Prime) list many shows, each with its own Play button. Find the
+        // show's title, then the nearest enclosing card that has a play button.
+        const never = new RegExp(request.never, "i");
+        const title = controls.find(c => c[1] === request.label);
+        if (!title) return JSON.stringify({status: "title_not_found"});
+        let card = title[0].parentElement;
+        for (let depth = 0; card && depth < 8; depth++, card = card.parentElement) {
+            const inside = controls.filter(c => c[0] !== title[0] && card.contains(c[0])
+                                                && !never.test(c[1]));
+            for (const prefix of request.prefixes) {
+                const hit = inside.find(c => c[1].toLowerCase().startsWith(prefix.toLowerCase()));
+                if (hit) { hit[0].click(); return JSON.stringify({status: "clicked", label: hit[1]}); }
+            }
+        }
+        return JSON.stringify({status: "no_button_in_card"});
+    }
     if (request.action === "click") {
         const want = request.label.toLowerCase();
         const hit = controls.find(c => c[1].toLowerCase() === want)
@@ -68,7 +85,7 @@ function run(argv) {
         });
         return JSON.stringify({browser: request.app, tabs: tabs});
     }
-    if (!["read", "click", "type", "navigate"].includes(request.action)) throw Error("Unknown browser action.");
+    if (!["read", "click", "type", "navigate", "press_in_card"].includes(request.action)) throw Error("Unknown browser action.");
     if (app.windows.length === 0) throw Error(request.app + " has no open window.");
     const front = app.windows[0];
     if (request.action === "navigate") {  // Same tab, so a multi-step task leaves one tab.

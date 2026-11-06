@@ -125,7 +125,7 @@ The user's name, home town, weather location, and streaming profiles come from
   often drowned out by Brain's own voice, so headphones help most. Control-C
   once, or the microphone key, also stops its talking.
 - A soft *tink* means Brain is listening; a *pop* means it heard you and is working.
-- Before sending a text, Brain reads it back; only "yes" sends it.
+- Before sending a text or an email reply, Brain reads it back; only "yes" sends it.
 - **"Brain, shut down"** quits, or press Control-C.
 
 ### Teach Brain the user's voice
@@ -185,6 +185,26 @@ Starts ChatGPT's voice mode, bound to Control-Option-Command-V in ChatGPT settin
    keystrokes" means this step is missing.
 
 Say "Hey Siri, Voice Chat." The same shortcut starts and stops voice mode.
+
+## 7. Remote help with Tailscale (optional)
+
+Lets a helper (set `BRAIN_HELPER_NAME` in `.env`) see and control the Mac from
+anywhere when the user asks for help. Done once, by the helper:
+
+1. Install [Tailscale](https://tailscale.com/download/mac) on this Mac and the
+   helper's Mac, sign both in to the same tailnet, and in Tailscale's settings
+   turn on **Launch at login**.
+2. System Settings › General › Sharing › **Screen Sharing** on. Under ⓘ, choose
+   **Only these users** and add the user (or a helper account).
+3. Have a text conversation with the helper in Messages (the message goes there).
+
+Then the user says "I need help from Sam" (Brain or ChatGPT). The
+`ask_for_remote_help` tool reconnects Tailscale, checks Screen Sharing, and drafts
+"… asked for help. Connect with Screen Sharing: vnc://100.x.x.x". After a spoken
+"yes" it is texted to the helper, who opens that link. The assistant never turns
+sharing settings on or off itself.
+
+Test: `.venv/bin/python scripts/cli.py help-me` shows whether it's ready.
 
 ## Troubleshooting
 

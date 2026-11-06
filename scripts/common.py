@@ -29,6 +29,8 @@ HOME_LATITUDE = os.environ.get("BRAIN_HOME_LATITUDE", "").strip()
 HOME_LONGITUDE = os.environ.get("BRAIN_HOME_LONGITUDE", "").strip()
 # Streaming profiles the assistant may choose; the first is the default.
 PROFILES = setting_list("BRAIN_PROFILES")
+# Who to text for remote help (a name in Messages), e.g. a family member.
+HELPER_NAME = os.environ.get("BRAIN_HELPER_NAME", "").strip()
 # Profiles it must never click (other family members, Kids).
 BLOCKED_PROFILES = {name.lower() for name in setting_list("BRAIN_BLOCKED_PROFILES")}
 # Set when the user says "stop" mid-task; long tools check it between steps.

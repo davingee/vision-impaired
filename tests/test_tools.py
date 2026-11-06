@@ -294,6 +294,59 @@ class ToolTests(unittest.TestCase):
                          ["High Potential"])
         self.assertEqual(matching_titles("Reacher", ["Home", "Movies"]), [])
 
+    def test_email_reply_sends_only_after_users_yes(self):
+        from mail import send_reply
+        with patch("mail.jxa") as jxa:
+            with self.assertRaises(ValueError):
+                send_reply(5, "On my way", confirmed=False)
+            jxa.assert_not_called()
+        import brain
+        answers = []
+        with patch("brain.ensure_server"):
+            b = brain.Brain(confirm=lambda question: answers.pop(0))
+        original = {"sender": "Pat Lee", "subject": "Dinner"}
+        with patch("brain.mail", return_value=original), \
+             patch("server.send_reply", return_value={"status": "sent"}) as send:
+            answers.append(False)
+            self.assertEqual(b.run_tool("send_mail_reply", {"message_id": 5, "text": "Yes!"})
+                             ["status"], "cancelled")
+            send.assert_not_called()
+            answers.append(True)
+            b.run_tool("send_mail_reply", {"message_id": 5, "text": "Yes!",
+                                           "user_confirmed": False})
+            send.assert_called_once_with(5, "Yes!", True)
+
+    def test_wrong_show_is_noticed(self):
+        from browser import shows_title
+        self.assertFalse(shows_title("NCIS: New York", "NCIS: Tony & Ziva S1 E1 No Country is Safe"))
+        self.assertTrue(shows_title("NCIS: New York", "NCIS: New York S1 E2 Pilot"))
+        self.assertTrue(shows_title("High Potential High Potential SERIES",
+                                    "HIGH POTENTIAL S1 E2 - Dancers in the Dark"))
+        self.assertTrue(shows_title("Elsbeth", "Elsbeth S3 E18"))
+
+    def test_remote_help_finds_tailscale_address_and_drafts_text(self):
+        import remote
+        ifconfig = ("en0: flags=8863\n\tinet 192.168.1.20 netmask 0xffffff00\n"
+                    "utun4: flags=8051\n\tinet 100.101.42.7 --> 100.101.42.7\n")
+        with patch("remote.run_command", return_value=ifconfig):
+            self.assertEqual(remote.tailscale_address(), "100.101.42.7")
+        with patch("remote.run_command", return_value="\tinet 100.200.1.1 \n\tinet 10.0.0.2\n"):
+            self.assertIsNone(remote.tailscale_address())  # 100.200 is not Tailscale's range.
+        with patch("remote.run_command", return_value=ifconfig), \
+             patch("remote.screen_sharing_on", return_value=True), \
+             patch("remote.HELPER_NAME", "Sam"), patch("remote.USER_NAME", "Pat"), \
+             patch("remote.list_chats", return_value={"conversations": [{"chat_id": 9}]}):
+            help = remote.prepare_remote_help()
+        self.assertTrue(help["ready"])
+        self.assertEqual((help["connect_link"], help["helper_chat_id"]), ("vnc://100.101.42.7", 9))
+        self.assertIn("vnc://100.101.42.7", help["message_to_send"])
+        with patch("remote.run_command", return_value=""), patch("remote.time.sleep"), \
+             patch("remote.screen_sharing_on", return_value=False), \
+             patch("remote.HELPER_NAME", ""):
+            help = remote.prepare_remote_help(wait_seconds=0)
+        self.assertFalse(help["ready"])
+        self.assertEqual(len(help["problems"]), 2)
+
     def test_stop_does_not_signal_an_exited_process(self):
         from unittest.mock import Mock
 

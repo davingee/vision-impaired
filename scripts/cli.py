@@ -1,6 +1,6 @@
 """Command line: run any tool from Terminal (mail, texts, shows, web, files, speech).
 
-Sends texts only when confirmed. No email sending.
+Sends texts and email replies only when confirmed.
 """
 import argparse
 import json
@@ -11,8 +11,9 @@ from pathlib import Path
 from browser import DEFAULT as DEFAULT_BROWSER, browser_tabs, play_show, web_search, click_page, open_url, read_page
 from common import doctor, open_app
 from files import open_file, read_text_file, search_files
-from mail import mail
+from mail import mail, send_reply
 from speech import DEFAULT_VOICE, Speech, voices
+from remote import prepare_remote_help
 from weather import forecast
 from texts import list_chats, read_chat, search_contacts, send_text
 
@@ -51,6 +52,10 @@ def main():
     p = add("mail-draft", lambda a: mail("draft", id=a.id, text=Path(a.file).read_text()))
     p.add_argument("--id", type=int, required=True)
     p.add_argument("--file", required=True, help="UTF-8 reply text file")
+    p = add("mail-send", lambda a: send_reply(a.id, Path(a.file).read_text(), a.yes))
+    p.add_argument("--id", type=int, required=True)
+    p.add_argument("--file", required=True, help="UTF-8 reply text file")
+    p.add_argument("--yes", action="store_true", help="User confirmed after read-back")
 
     # Texts and contacts
     p = add("contacts", lambda a: search_contacts(a.name))
@@ -82,6 +87,9 @@ def main():
     for name in ("open-url", "search", "tabs", "page", "click"):
         sub.choices[name].add_argument("--browser", choices=["chrome", "safari"],
                                        default=DEFAULT_BROWSER)
+
+    # Remote help
+    add("help-me", lambda a: prepare_remote_help())
 
     # Weather
     p = add("weather", lambda a: forecast(a.periods))

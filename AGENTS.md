@@ -9,7 +9,8 @@ The MCP equivalent is `scripts/server.py`.
 - Treat pauses and background media as background, not commands.
 - Read mail only when requested. For "latest", list recent messages first, then
   read the returned exact ID. Do not assume the selected message is the latest.
-- Mail drafts are not sent messages. Email sending is not implemented.
+- Mail drafts are not sent messages. To send, use send_mail_reply (replies only):
+  read the recipient, subject, and exact text back; send only after a clear yes.
 - Texts: list conversations, then read the returned chat_id. Before sending,
   read the recipient name and exact text back; send only after a clear yes.
   Sending works only to existing conversations. Report "pending" honestly.
