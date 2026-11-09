@@ -88,4 +88,4 @@ local_settings.py
 Thumbs.db
 
 # Machine-specific plugin paths; generate with: .venv/bin/python scripts/configure_plugin.py
-plugins/low-vision-mac/.mcp.json
+# plugins/low-vision-mac/.mcp.json
